@@ -8,12 +8,21 @@ exports.createCategory = async (req, res) => {
 
         if (!file) return res.status(400).json({ msg: "Rasm yuboring" });
 
+        // 🔐 NOM TAKRORLANMASLIGI UCHUN TEKSHIRUV
+        const existing = await Category.findOne({
+            name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }
+        });
+
+        if (existing) {
+            return res.status(400).json({ msg: "Bunday nomli kategoriya allaqachon mavjud!" });
+        }
+
         const result = await cloudinary.uploader.upload(file.path, {
             folder: "categories"
         });
 
         const category = new Category({
-            name,
+            name: name.trim(),
             image: result.secure_url
         });
 

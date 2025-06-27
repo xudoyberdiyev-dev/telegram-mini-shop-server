@@ -6,44 +6,43 @@ dotenv.config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const tempUsers = new Map(); // vaqtincha ismni saqlash
+const tempUsers = new Map(); // vaqtincha foydalanuvchilar
 
 // 🔹 /start komandasi
 bot.start(async (ctx) => {
-    const telegramId = ctx.from.id.toString();
+    const chatId = ctx.from?.id?.toString();
+    if (!chatId) return ctx.reply("❌ Xatolik: Chat ID aniqlanmadi.");
 
-    // 1. ADMIN tekshirish
-    if (telegramId === process.env.ADMIN_CHAT_ID) {
+    // 🔸 Admin bo‘lsa
+    if (chatId === process.env.ADMIN_CHAT_ID) {
         return ctx.reply("👋 Salom admin!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🧑‍💻 Kabinetga kirish", "https://your-admin-app-url.com")]
+            [Markup.button.webApp("🧑‍💻 Kabinetga kirish", `https://telegram-mini-shop-client-7qi2.vercel.app/category?chatId=${chatId}`)]
         ]).resize());
     }
 
-    // 2. Oddiy foydalanuvchi bazada bormi?
-    const user = await User.findOne({ telegramId });
-    if (user) {
-        return ctx.reply("✅ Ro‘yxatdan o‘tgansiz!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🛍 Mini ilovani ochish", "https://your-miniapp-url.com")]
-        ]).resize());
+    // 🔸 Oddiy foydalanuvchi bazada bormi?
+    const existingUser = await User.findOne({ chatId });
+    if (existingUser) {
+        return ctx.reply("🎉 Siz allaqachon ro‘yxatdan o‘tgansiz!", Markup.inlineKeyboard([
+            [Markup.button.webApp("🛍 Mini ilovani ochish", `https://telegram-mini-shop-client-7qi2.vercel.app/?chatId=${chatId}`)]
+        ]));
     }
 
-    // 3. Ro‘yxatdan o‘tmaganlar uchun ism so‘rash
-    tempUsers.set(telegramId, { step: 'name' });
-    ctx.reply("Ismingizni kiriting:");
+    // 🔸 Ro‘yxatdan o‘tmagan bo‘lsa – ismni so‘rash
+    tempUsers.set(chatId, { step: 'name' });
+    return ctx.reply("Ismingizni kiriting:");
 });
 
-// 🔹 Matnli javob: ismi yoki raqam bosqichi
+// 🔹 Matnli javob (ism qabul qilish)
 bot.on('text', async (ctx) => {
-    const telegramId = ctx.from.id.toString();
-    const temp = tempUsers.get(telegramId);
-
+    const chatId = ctx.from?.id?.toString();
+    const temp = tempUsers.get(chatId);
     if (!temp) return;
 
-    // 1. Ism bosqichi
     if (temp.step === 'name') {
         temp.name = ctx.message.text;
         temp.step = 'phone';
-        tempUsers.set(telegramId, temp);
+        tempUsers.set(chatId, temp);
 
         return ctx.reply("📞 Iltimos, telefon raqamingizni kontakt sifatida yuboring:", Markup.keyboard([
             [Markup.button.contactRequest("📱 Kontakt yuborish")]
@@ -53,25 +52,35 @@ bot.on('text', async (ctx) => {
 
 // 🔹 Kontakt yuborilganda
 bot.on('contact', async (ctx) => {
-    const telegramId = ctx.from.id.toString();
-    const temp = tempUsers.get(telegramId);
+    const chatId = ctx.from?.id?.toString();
+    const temp = tempUsers.get(chatId);
+    if (!temp) return ctx.reply("❌ Xatolik: vaqtincha ma’lumot topilmadi.");
 
-    if (!temp) return;
+    const phone = ctx.message.contact?.phone_number;
 
-    // 2. Foydalanuvchini saqlash
-    const phone = ctx.message.contact.phone_number;
+    // ❗ Agar telefon yoki chatId yo‘q bo‘lsa – xatolik
+    if (!phone || !chatId) {
+        return ctx.reply("❌ Telefon raqam yoki chat ID topilmadi.");
+    }
 
-    await User.create({
-        telegramId,
-        name: temp.name,
-        phone
-    });
+    try {
+        // 🔸 Foydalanuvchini bazaga yozamiz
+        await User.create({
+            chatId,
+            name: temp.name,
+            phone,
+        });
 
-    tempUsers.delete(telegramId);
+        // 🔸 Vaqtinchalik foydalanuvchini o‘chiramiz
+        tempUsers.delete(chatId);
 
-    return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
-        [Markup.button.webApp("🛍 Mini ilovani ochish", "https://your-miniapp-url.com")]
-    ]).resize());
+        return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
+            [Markup.button.webApp("🛍 Mini ilovani ochish", `https://telegram-mini-shop-client-7qi2.vercel.app/?chatId=${chatId}`)]
+        ]));
+    } catch (e) {
+        console.error("❌ Foydalanuvchini saqlashda xatolik:", e.message);
+        return ctx.reply("❌ Ro‘yxatdan o‘tishda xatolik yuz berdi.");
+    }
 });
 
 module.exports = bot;

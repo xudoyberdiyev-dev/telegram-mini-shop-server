@@ -33,7 +33,7 @@ app.listen(PORT, () => {
 });
 
 const categoryRoutes = require('./routes/categoryRoutes');
-app.use('/api/categories', categoryRoutes);
+app.use('/api/v1/categories', categoryRoutes);
 
 const productRoutes = require('./routes/productRoutes');
-app.use('/api/products', productRoutes);
+app.use('/api/v1/products', productRoutes);
