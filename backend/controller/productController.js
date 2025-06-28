@@ -35,6 +35,16 @@ exports.getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+exports.getProductsByCategory = async (req, res) => {
+    try {
+        const categoryId = req.params.categoryId;
+        const products = await Product.find({ category: categoryId }).populate('category');
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 exports.getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id).populate('category');
@@ -70,6 +80,27 @@ exports.deleteProduct = async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
         res.json({ msg: "Mahsulot o‘chirildi" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.searchProducts = async (req, res) => {
+    try {
+        const { query } = req.query; // ?query=non
+
+        if (!query) {
+            return res.status(400).json({ msg: "Qidiruv so'zi yuborilmadi" });
+        }
+
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } }
+            ]
+        }).populate('category');
+
+        res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
