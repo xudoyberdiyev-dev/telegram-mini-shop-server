@@ -55,6 +55,30 @@ exports.getProductById = async (req, res) => {
     }
 };
 
+exports.getPaginatedProducts = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+
+        const skip = (page - 1) * limit;
+
+        const total = await Product.countDocuments();
+        const products = await Product.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }); // eng yangi birinchi
+
+        res.json({
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+            products,
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Xatolik yuz berdi', detail: err.message });
+    }
+};
+
 
 exports.updateProduct = async (req, res) => {
     try {
