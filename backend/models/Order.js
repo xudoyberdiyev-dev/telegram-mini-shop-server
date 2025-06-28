@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // ✅ shu joy muhim: 'User' modeli bilan bog‘laymiz
+        ref: 'User',
         required: true,
     },
     products: [
         {
             product_id: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product', // ✅ mahsulotni populate qilish uchun
+                ref: 'Product',
                 required: true,
             },
             count: {
@@ -28,7 +28,7 @@ const orderSchema = new mongoose.Schema({
         required: true,
     },
 }, {
-    timestamps: true, // ✅ bu ham kerak edi oldingi sorting uchun
+    timestamps: true,
 });
 
 module.exports = mongoose.model('Order', orderSchema);

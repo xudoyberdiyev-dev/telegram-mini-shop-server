@@ -18,7 +18,6 @@ exports.makeOrder = async (req, res) => {
             return { product_id: b.product_id._id, count: b.count };
         });
 
-        // ⚠️ Noto‘g‘ri raqam yuborilsa — admin kanalga ogohlantirish
         if (!/^\d{9}$/.test(userPhone)) {
             const user = await User.findById(userId);
 
