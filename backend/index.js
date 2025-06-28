@@ -37,3 +37,6 @@ app.use('/api/v1/categories', categoryRoutes);
 
 const productRoutes = require('./routes/productRoutes');
 app.use('/api/v1/products', productRoutes);
+
+const basketRoutes = require('./routes/basketRoutes');
+app.use('/api/v1/basket', basketRoutes);

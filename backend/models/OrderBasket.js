@@ -1,18 +1,9 @@
+// models/OrderBasket.js
 const mongoose = require('mongoose');
 
 const orderBasketSchema = new mongoose.Schema({
-    orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
-    },
-    basketId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Basket',
-        required: true
-    }
-}, {
-    timestamps: true
+    order_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+    basket_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Basket' },
 });
 
 module.exports = mongoose.model('OrderBasket', orderBasketSchema);
