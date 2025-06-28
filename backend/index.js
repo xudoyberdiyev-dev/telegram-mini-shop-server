@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const bot = require('./bot/telegramBot');
+const { userBot } = require('./bot/bot');
 
 dotenv.config();
 
@@ -23,8 +23,8 @@ app.get('/', (req, res) => {
 });
 
 // Botni ishga tushurish
-bot.launch();
-console.log("🤖 Telegram bot ishga tushdi");
+userBot.launch().then(() => console.log("Telegram bot ishga tushdi ✅"));
+
 
 // Port
 const PORT = process.env.PORT || 5000;
@@ -40,3 +40,7 @@ app.use('/api/v1/products', productRoutes);
 
 const basketRoutes = require('./routes/basketRoutes');
 app.use('/api/v1/basket', basketRoutes);
+
+const orderRoutes = require('./routes/orderRoutes');
+app.use('/api/v1/order', orderRoutes);
+
