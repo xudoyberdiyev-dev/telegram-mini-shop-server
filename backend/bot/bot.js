@@ -55,12 +55,12 @@ userBot.on('contact', async (ctx) => {
     if (!phone || !chatId) return ctx.reply("❌ Kontakt yoki chat ID topilmadi.");
 
     try {
-        await User.create({ chatId, name: temp.name, phone });
-        tempUsers.delete(chatId);
+        const newUser = await User.create({ chatId, name: temp.name, phone }); // <- Bu kerak edi!
 
         return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
-            Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?chatId=${chatId}`)
+            Markup.button.webApp("🛍 Mini ilova", `https://your-site.vercel.app/?userId=${newUser._id}`)
         ]));
+
     } catch (e) {
         console.error("Foydalanuvchini saqlashda xatolik:", e.message);
         return ctx.reply("❌ Ro‘yxatdan o‘tishda xatolik.");

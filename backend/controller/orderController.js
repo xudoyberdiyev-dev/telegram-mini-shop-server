@@ -57,6 +57,13 @@ exports.makeOrder = async (req, res) => {
 
 
 exports.getAllOrders = async (req, res) => {
+    const chatId = req.query.chatId;
+
+    // ✅ Chat ID tekshiruvi
+    if (chatId !== process.env.ADMIN_CHAT_ID) {
+        return res.status(403).json({ msg: "Ruxsat yo‘q" });
+    }
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -77,3 +84,4 @@ exports.getAllOrders = async (req, res) => {
         orders,
     });
 };
+
