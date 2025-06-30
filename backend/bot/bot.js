@@ -59,7 +59,7 @@ userBot.on('contact', async (ctx) => {
         tempUsers.delete(chatId);
 
         return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?chatId=${chatId}`)]
+            Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?chatId=${chatId}`)
         ]));
     } catch (e) {
         console.error("Foydalanuvchini saqlashda xatolik:", e.message);
