@@ -13,19 +13,22 @@ userBot.start(async (ctx) => {
     const chatId = ctx.from?.id?.toString();
     if (!chatId) return ctx.reply("❌ Chat ID topilmadi");
 
+    // 👨‍💻 Admin kirsa
     if (chatId === process.env.ADMIN_CHAT_ID) {
         return ctx.reply("👋 Salom admin!", Markup.inlineKeyboard([
             [Markup.button.webApp("🧑‍💻 Kabinetga kirish", `https://telegram-mini-shop-client.vercel.app/category?chatId=${chatId}`)]
         ]));
     }
 
+    // ✅ Allaqachon ro‘yxatdan o‘tgan foydalanuvchi
     const existingUser = await User.findOne({ chatId });
     if (existingUser) {
         return ctx.reply("✅ Siz allaqachon ro‘yxatdan o‘tgansiz!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?chatId=${chatId}`)]
+            [Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?userId=${existingUser._id}`)]
         ]));
     }
 
+    // 📝 Ro‘yxat jarayoni
     tempUsers.set(chatId, { step: 'name' });
     return ctx.reply("Ismingizni kiriting:");
 });
@@ -55,12 +58,12 @@ userBot.on('contact', async (ctx) => {
     if (!phone || !chatId) return ctx.reply("❌ Kontakt yoki chat ID topilmadi.");
 
     try {
-        const newUser = await User.create({ chatId, name: temp.name, phone }); // <- Bu kerak edi!
+        const newUser = await User.create({ chatId, name: temp.name, phone });
+        tempUsers.delete(chatId);
 
         return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
-            Markup.button.webApp("🛍 Mini ilova", `https://your-site.vercel.app/?userId=${newUser._id}`)
+            Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?userId=${newUser._id}`)
         ]));
-
     } catch (e) {
         console.error("Foydalanuvchini saqlashda xatolik:", e.message);
         return ctx.reply("❌ Ro‘yxatdan o‘tishda xatolik.");
