@@ -10,8 +10,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
-
 // MongoDB ulash
 mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("✅ MongoDB ulandi"))
@@ -24,7 +22,6 @@ app.get('/', (req, res) => {
 
 // Botni ishga tushurish
 userBot.launch().then(() => console.log("Telegram bot ishga tushdi ✅"));
-
 
 // Port
 const PORT = process.env.PORT || 5000;

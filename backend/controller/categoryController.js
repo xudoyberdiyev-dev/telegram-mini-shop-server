@@ -33,7 +33,7 @@ exports.createCategory = async (req, res) => {
     }
 };
 
-exports.getAllCategories = async (req, res) => {
+exports.    getAllCategories = async (req, res) => {
     const categories = await Category.find().sort({ createdAt: -1 });
     res.json(categories);
 };
