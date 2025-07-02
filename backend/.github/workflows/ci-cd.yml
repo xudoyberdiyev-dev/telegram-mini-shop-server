@@ -13,6 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Send Telegram notification (Deploy started)
+      if: always()
+      run: |
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="⚙️ *Deploy jarayoni boshlandi!* 🧑‍💻%0A%0AFlutterchi bro tayyormisiz yangi apilar bor😉" \
+          -d parse_mode=Markdown
+
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendSticker \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d sticker="CAACAgQAAxkBAAMKZ_5Fikm9U1dAOff5x1z2RZIPd5UAAkoTAAIYdwlTeIN6-a2BPik2BA"
+
     - name: 🔽 Repozitoriyani clone qilish
       uses: actions/checkout@v4
 
@@ -50,3 +62,29 @@ jobs:
           pm2 delete your-app-name || true
           pm2 start backend/index.js --name your-app-name
           pm2 save
+
+    - name: Telegram Notify (Success)
+      if: success()
+      run: |
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="✅ Spring Boot deploy MUVAFFAQIYATLI tugadi! 🚀%0A%0A📝 *Commit:* _${{ github.event.head_commit.message }}_%0A%0ATayyormisizlar Flutterchi bro 👀%0A[Shahzodbek](https://t.me/burxann)%0A%0A[Swagger UI](https://api.osonishtop.uz/swagger-ui/index.html)" \
+          -d parse_mode=Markdown
+
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendAnimation \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d animation="CAACAgIAAxkBAANJaBB77sVqHSUQUHiN1aueq7uhvJoAAjsPAAKzG_hJvpDMSwABF75jNgQ" \
+          -d caption="🎉 *Deploy muvaffaqiyatli yakunlandi!*%0A%0AHamma ishga kirishsin! 💪" \
+          -d parse_mode=Markdown
+
+    - name: Send Telegram notification (Failure)
+      if: failure()
+      run: |
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="❌ Spring Boot deploy MUVAFFAQIYATSIZ tugadi! 🚀%0A%0A📝 *Commit:* _${{ github.event.head_commit.message }}_%0A%0A❌ Muvaffaqiyatsiz deploy qilindi!" \
+          -d parse_mode=Markdown
+
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendSticker \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d sticker="CAACAgQAAxkBAAMGZ_4K_bLdPd7eaMUGv4OeC_kqDn4AAuYTAAKAq8BTiVm6hOs4-pk2BA" \
