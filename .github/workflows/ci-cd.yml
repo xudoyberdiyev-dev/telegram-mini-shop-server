@@ -4,9 +4,9 @@ name: Node.js CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build-deploy:
@@ -88,4 +88,3 @@ jobs:
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendSticker \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
           -d sticker="CAACAgQAAxkBAAMGZ_4K_bLdPd7eaMUGv4OeC_kqDn4AAuYTAAKAq8BTiVm6hOs4-pk2BA" \
-          
