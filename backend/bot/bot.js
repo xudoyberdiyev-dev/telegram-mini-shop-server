@@ -6,6 +6,8 @@ dotenv.config();
 
 const userBot = new Telegraf(process.env.BOT_TOKEN); // Foydalanuvchi bot
 const adminBot = new Telegraf(process.env.ADMIN_BOT_TOKEN); // Kanalga yuborish bot
+const BASE_URL = "https://telegram-mini-shop-client.vercel.app/";
+// const BASE_URL = "https://272d-31-148-165-251.ngrok-free.app/";
 
 const tempUsers = new Map();
 
@@ -14,19 +16,18 @@ userBot.start(async (ctx) => {
     if (!chatId) return ctx.reply("❌ Chat ID topilmadi");
 
     // 👨‍💻 Admin kirsa
-    if (chatId === process.env.ADMIN_CHAT_ID) {
+    if (chatId === process.env.ADMIN_CHAT_ID)
         return ctx.reply("👋 Salom admin!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🧑‍💻 Kabinetga kirish", `https://telegram-mini-shop-client.vercel.app/category?chatId=${chatId}`)]
+            [Markup.button.webApp("🧑‍💻 Kabinetga kirish", `${BASE_URL}category?chatId=${chatId}`)]
         ]));
-    }
 
     // ✅ Allaqachon ro‘yxatdan o‘tgan foydalanuvchi
     const existingUser = await User.findOne({ chatId });
-    if (existingUser) {
-        return ctx.reply("✅ Siz allaqachon ro‘yxatdan o‘tgansiz!", Markup.inlineKeyboard([
-            [Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?userId=${existingUser._id}`)]
+    if (existingUser)
+        return ctx.reply(`✅ Siz allaqachon ro‘yxatdan o‘tgansiz! ${existingUser._id}`, Markup.inlineKeyboard([
+            [Markup.button.webApp("🛍 Mini ilova", `${BASE_URL}?userId=${existingUser._id}`)]
         ]));
-    }
+    
 
     // 📝 Ro‘yxat jarayoni
     tempUsers.set(chatId, { step: 'name' });
@@ -62,7 +63,7 @@ userBot.on('contact', async (ctx) => {
         tempUsers.delete(chatId);
 
         return ctx.reply("🎉 Ro‘yxatdan o‘tildi!", Markup.inlineKeyboard([
-            Markup.button.webApp("🛍 Mini ilova", `https://telegram-mini-shop-client.vercel.app/?userId=${newUser._id}`)
+            Markup.button.webApp("🛍 Mini ilova", `${BASE_URL}?userId=${newUser._id}`)
         ]));
     } catch (e) {
         console.error("Foydalanuvchini saqlashda xatolik:", e.message);
