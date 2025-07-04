@@ -43,7 +43,7 @@ exports.makeOrder = async (req, res) => {
         for (const item of baskets) {
             msg += `📦 ${item.product_id.name} × ${item.count} = ${item.count * item.product_id.price} so'm\n`;
         }
-        msg += `\n💰 Umumiy: ${totalPrice} so'm\n📞 Tel: ${userPhone}`;
+        msg += `\n💰 Umumiy: ${totalPrice} so'm\n📞 Tel: ${userPhone} \n📞 Tel: ${name}`;
 
         await adminBot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg);
 
