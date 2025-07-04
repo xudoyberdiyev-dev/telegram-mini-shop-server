@@ -1,11 +1,28 @@
-// GET /user/by-chatId/:chatId
-exports.getUserByChatId = async (req, res) => {
-    try {
-        const user = await User.findOne({ chatId: req.params.chatId });
-        if (!user) return res.status(404).json({ msg: 'Foydalanuvchi topilmadi' });
+const User = require('../models/User');
 
-        return res.json({ _id: user._id, name: user.name, phone: user.phone });
+exports.getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
+        res.json(user);
     } catch (err) {
-        return res.status(500).json({ msg: 'Xatolik', error: err.message });
+        console.error("getUserById error:", err);
+        res.status(500).json({ msg: "Server xatosi" });
+    }
+};
+
+exports.updateUser = async (req, res) => {
+    try {
+        const { name, phone } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { name, phone },
+            { new: true }
+        );
+        if (!updatedUser) return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
+        res.json(updatedUser);
+    } catch (err) {
+        console.error("updateUser error:", err);
+        res.status(500).json({ msg: "Ma’lumot yangilanmadi" });
     }
 };

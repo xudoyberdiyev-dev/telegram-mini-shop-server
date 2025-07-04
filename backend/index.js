@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const { userBot } = require('./bot/bot');
+const {userBot} = require('./bot/bot');
 
 dotenv.config();
 
@@ -43,3 +43,4 @@ app.use('/api/v1/order', orderRoutes);
 
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/v1/user', userRoutes);
+
