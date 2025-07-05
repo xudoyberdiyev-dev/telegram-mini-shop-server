@@ -24,7 +24,7 @@ userBot.start(async (ctx) => {
     // ✅ Allaqachon ro‘yxatdan o‘tgan foydalanuvchi
     const existingUser = await User.findOne({ chatId });
     if (existingUser)
-        return ctx.reply(`✅ Siz allaqachon ro‘yxatdan o‘tgansiz! ${existingUser._id}`, Markup.inlineKeyboard([
+        return ctx.reply(`✅ Siz allaqachon ro‘yxatdan o‘tgansiz!`, Markup.inlineKeyboard([
             [Markup.button.webApp("🛍 Mini ilova", `${BASE_URL}?userId=${existingUser._id}`)]
         ]));
     
