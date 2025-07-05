@@ -7,7 +7,9 @@ const User = require('../models/User');
 exports.makeOrder = async (req, res) => {
     try {
         const userId = req.body.user_id;
-        const userPhone = req.body.phone;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
 
         const baskets = await Basket.find({ user_id: userId, is_ordered: false }).populate('product_id');
         if (!baskets.length) return res.status(400).json({ msg: "Savat bo‘sh" });
@@ -18,34 +20,26 @@ exports.makeOrder = async (req, res) => {
             return { product_id: b.product_id._id, count: b.count };
         });
 
-        if (!/^\d{9}$/.test(userPhone)) {
-            const user = await User.findById(userId);
-
-            let warning = `🚫 Buyurtma noto‘g‘ri raqam bilan:\n`;
-            warning += `📞 Kiritilgan raqam: ${userPhone}\n`;
-            warning += `👤 Foydalanuvchi: ${user?.name || 'Nomaʼlum'}\n`;
-            warning += `📲 Botdagi raqam: ${user?.phone || 'Topilmadi'}`;
-
-            await adminBot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, warning);
-            return res.status(400).json({ msg: "Telefon raqam noto‘g‘ri" });
-        }
-
         const order = new Order({
             user_id: userId,
             products,
             total_price: totalPrice,
-            phone: userPhone
+            phone: user.phone, // ✅ Bot orqali olingan raqam
         });
         await order.save();
+
         await Basket.deleteMany({ user_id: userId, is_ordered: false });
 
-        let msg = `🛒 Yangi buyurtma!\n\n`;
+        // ✅ Admin kanalga xabar yuborish
+        let msg = `🛒 <b>Yangi buyurtma!</b>\n\n`;
         for (const item of baskets) {
             msg += `📦 ${item.product_id.name} × ${item.count} = ${item.count * item.product_id.price} so'm\n`;
         }
-        msg += `\n💰 Umumiy: ${totalPrice} so'm\n📞 Tel: ${userPhone} \n📞 Tel: ${name}`;
+        msg += `\n💰 Umumiy: ${totalPrice} so'm`;
+        msg += `\n👤 Ism: ${user.name}`;
+        msg += `\n📞 Tel: ${user.phone}`;
 
-        await adminBot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg);
+        await adminBot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg, { parse_mode: 'HTML' });
 
         return res.json({ msg: "Buyurtma qabul qilindi", order });
     } catch (err) {
@@ -53,6 +47,7 @@ exports.makeOrder = async (req, res) => {
         return res.status(500).json({ msg: "Server xatoligi", detail: err.message });
     }
 };
+
 
 
 
