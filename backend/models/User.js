@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true,
+    },
+    location: {
+        latitude: Number,
+        longitude: Number
     }
 }, {
     timestamps: true

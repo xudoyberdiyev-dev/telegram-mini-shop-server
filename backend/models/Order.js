@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
                 type: Number,
                 required: true,
             },
-        }
+        },
     ],
     total_price: {
         type: Number,
@@ -27,8 +27,12 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-}, {
-    timestamps: true,
-});
+    status: {
+        type: String,
+        enum: ['SO\'ROV', 'QABUL QILINDI', 'QADOQLANMOQDA', 'YETKAZILMOQDA', 'YETIB KELDI', 'FOYDALANUVCHI QABUL QILDI', 'BEKOR QILINDI'],
+        default: "SO'ROV"
+    },
+    cancel_reason: String,
+}, {timestamps: true});
 
 module.exports = mongoose.model('Order', orderSchema);

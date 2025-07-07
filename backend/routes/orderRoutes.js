@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const orderController = require('../controller/orderController'); // controller faylingiz shu nomda bo‘lsa
+const orderController = require('../controller/orderController');
 
-// POST: Buyurtma berish
+// Zakaz qilish
 router.post('/makeOrder', orderController.makeOrder);
 
-// GET: Barcha buyurtmalarni olish (admin uchun)
+// Barcha buyurtmalar
 router.get('/getAllOrders', orderController.getAllOrders);
+
+// Statusni yangilash
+router.put('/updateStatus/:orderId', orderController.updateOrderStatus);
+
+// Admin bekor qilish
+router.put('/cancelByAdmin/:orderId', orderController.cancelByAdmin);
+
+// Foydalanuvchi bekor qilishi
+router.put('/cancelByUser/:orderId', orderController.cancelByUser);
 
 module.exports = router;
