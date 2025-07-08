@@ -39,7 +39,6 @@ exports.makeOrder = async (req, res) => {
 
         await Basket.deleteMany({ user_id: userId, is_ordered: false });
 
-        // 📢 Kanalga yuboriladigan xabar
         let msg = `🛒 <b>Yangi buyurtma!</b>\n\n`;
         baskets.forEach((item) => {
             msg += `📦 <b>${item.product_id.name}</b> × ${item.count} = <b>${item.count * item.product_id.price}</b> so'm\n`;
@@ -51,7 +50,6 @@ exports.makeOrder = async (req, res) => {
             msg += `\n📍 <b>Lokatsiya:</b> <a href="https://www.google.com/maps?q=${user.location.latitude},${user.location.longitude}">Xaritada ochish</a>`;
         }
 
-        // ✅ Kanalga yuborish
         await bot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg, {
             parse_mode: 'HTML',
             disable_web_page_preview: true
