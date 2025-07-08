@@ -22,9 +22,16 @@ exports.loginAdmin = async (req, res) => {
     });
 };
 exports.getAdminProfile = async (req, res) => {
-    const {fullName, phone, password} = req.admin;
-    res.json({fullName, phone, password});
+    try {
+        const admin = await Admin.findById(req.admin.id).select("-__v");
+        if (!admin) return res.status(404).json({ message: "Admin topilmadi" });
+        res.json(admin);
+    } catch (err) {
+        res.status(500).json({ message: "Server xatoligi" });
+    }
 };
+
+
 exports.updateAdmin = async (req, res) => {
     const {fullName, phone, password} = req.body;
     const updateData = {fullName, phone};

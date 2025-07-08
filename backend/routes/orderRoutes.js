@@ -7,6 +7,8 @@ router.post('/makeOrder', orderController.makeOrder);
 
 // Barcha buyurtmalar
 router.get('/getAllOrders', orderController.getAllOrders);
+router.get('/user/:userId', orderController.getOrdersByUser);
+router.get('/history/:userId', orderController.getUserOrderHistory);
 
 // Statusni yangilash
 router.put('/updateStatus/:orderId', orderController.updateOrderStatus);

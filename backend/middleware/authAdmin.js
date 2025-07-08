@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
+const verifyAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ message: "Token mavjud emas" });
 
@@ -15,3 +15,5 @@ module.exports = (req, res, next) => {
         res.status(403).json({ message: "Token noto‘g‘ri yoki eskirgan" });
     }
 };
+
+module.exports = verifyAdmin;

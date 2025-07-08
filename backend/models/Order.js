@@ -29,8 +29,8 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['SO\'ROV', 'QABUL QILINDI', 'QADOQLANMOQDA', 'YETKAZILMOQDA', 'YETIB KELDI', 'FOYDALANUVCHI QABUL QILDI', 'BEKOR QILINDI'],
-        default: "SO'ROV"
+        enum: ['BUYURTMA', 'QABUL QILINDI', 'QADOQLANMOQDA', 'YETKAZILMOQDA', 'YETIB KELDI', 'HARIDOR QABUL QILDI', 'BEKOR QILINDI'],
+        default: "BUYURTMA"
     },
     cancel_reason: String,
 }, {timestamps: true});
