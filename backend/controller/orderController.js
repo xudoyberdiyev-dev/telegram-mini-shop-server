@@ -4,20 +4,29 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const {adminBot} = require('../bot/bot');
 const OrderHistory = require('../models/History');
+const { Telegraf } = require('telegraf');
+
+require('dotenv').config();
+
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
 
 exports.makeOrder = async (req, res) => {
     try {
         const userId = req.body.user_id;
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({msg: 'Foydalanuvchi topilmadi'});
+        if (!user) return res.status(404).json({ msg: 'Foydalanuvchi topilmadi' });
 
-        const baskets = await Basket.find({user_id: userId, is_ordered: false}).populate('product_id');
-        if (!baskets.length) return res.status(400).json({msg: 'Savat bo‘sh'});
+        const baskets = await Basket.find({ user_id: userId, is_ordered: false }).populate('product_id');
+        if (!baskets.length) return res.status(400).json({ msg: 'Savat bo‘sh' });
 
         let totalPrice = 0;
         const products = baskets.map((b) => {
             totalPrice += b.count * b.product_id.price;
-            return {product_id: b.product_id._id, count: b.count};
+            return {
+                product_id: b.product_id._id,
+                count: b.count
+            };
         });
 
         const order = await Order.create({
@@ -25,32 +34,34 @@ exports.makeOrder = async (req, res) => {
             products,
             total_price: totalPrice,
             phone: user.phone,
-            status: "BUYURTMA" // 🔥 STATUS BILAN
+            status: "BUYURTMA"
         });
 
-        await Basket.deleteMany({user_id: userId, is_ordered: false});
+        await Basket.deleteMany({ user_id: userId, is_ordered: false });
 
-        // ✅ Telegramga yuborish
-        try {
-            let msg = `🛒 <b>Yangi buyurtma!</b>\n\n`;
-            baskets.forEach((item) => {
-                msg += `📦 ${item.product_id.name} × ${item.count} = ${item.count * item.product_id.price} so'm\n`;
-            });
-            msg += `\n💰 Umumiy: ${totalPrice} so'm`;
-            msg += `\n👤 Ism: ${user.name}`;
-            msg += `\n📞 Tel: ${user.phone}`;
-            if (user?.location?.latitude && user?.location?.longitude) {
-                msg += `\n📍 Lokatsiya: <a href="https://www.google.com/maps?q=${user.location.latitude},${user.location.longitude}">Xaritada ochish</a>`;
-            }
-            await adminBot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg, {parse_mode: 'HTML'});
-        } catch (e) {
-            console.error('Telegram xatoligi:', e);
+        // 📢 Kanalga yuboriladigan xabar
+        let msg = `🛒 <b>Yangi buyurtma!</b>\n\n`;
+        baskets.forEach((item) => {
+            msg += `📦 <b>${item.product_id.name}</b> × ${item.count} = <b>${item.count * item.product_id.price}</b> so'm\n`;
+        });
+        msg += `\n💰 <b>Umumiy:</b> ${totalPrice} so'm`;
+        msg += `\n👤 <b>Ism:</b> ${user.name}`;
+        msg += `\n📞 <b>Tel:</b> ${user.phone}`;
+        if (user?.location?.latitude && user?.location?.longitude) {
+            msg += `\n📍 <b>Lokatsiya:</b> <a href="https://www.google.com/maps?q=${user.location.latitude},${user.location.longitude}">Xaritada ochish</a>`;
         }
 
-        res.json({msg: 'Buyurtma qabul qilindi', order});
+        // ✅ Kanalga yuborish
+        await bot.telegram.sendMessage(process.env.ADMIN_CHANNEL_ID, msg, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true
+        });
+
+        res.json({ msg: 'Buyurtma qabul qilindi', order });
+
     } catch (err) {
-        console.error('makeOrder error:', err);
-        res.status(500).json({msg: 'Server xatoligi', detail: err.message});
+        console.error('makeOrder xatoligi:', err);
+        res.status(500).json({ msg: 'Server xatoligi', detail: err.message });
     }
 };
 
