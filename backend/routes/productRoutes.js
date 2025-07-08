@@ -12,5 +12,4 @@ router.get('/:id', controller.getProductById);
 router.put('/:id', upload.single('file'), controller.updateProduct);
 router.delete('/:id', controller.deleteProduct);
 
-
 module.exports = router;
