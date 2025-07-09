@@ -5,6 +5,7 @@ const User = require('../models/User');
 const {adminBot} = require('../bot/bot');
 const OrderHistory = require('../models/History');
 const { Telegraf } = require('telegraf');
+const axios = require('axios');
 
 require('dotenv').config();
 
@@ -105,8 +106,6 @@ exports.getUserOrderHistory = async (req, res) => {
 exports.getOrdersByUser = async (req, res) => {
     try {
         const userId = req.params.userId;
-
-        // Barcha userga tegishli orderlarni olish
         const orders = await Order.find({ user_id: userId })
             .populate('products.product_id')
             .sort({ createdAt: -1 });
@@ -119,18 +118,19 @@ exports.getOrdersByUser = async (req, res) => {
                 order.status === 'FOYDALANUVCHI QABUL QILDI';
 
             if (isFinished) {
-                // Tarixga qo‘shish
-                await OrderHistory.create({
-                    order_id: order._id,
-                    user_id: userId,
-                    status: order.status,
-                    cancel_reason: order.cancel_reason || undefined,
-                });
+                // 🔐 Tarixda mavjud emasligini tekshiramiz
+                const exists = await OrderHistory.findOne({ order_id: order._id });
+                if (!exists) {
+                    await OrderHistory.create({
+                        order_id: order._id,
+                        user_id: userId,
+                        status: order.status,
+                        cancel_reason: order.cancel_reason || undefined,
+                    });
+                }
 
-                // Orderni asosiy ro‘yxatdan o‘chirish
                 await Order.findByIdAndDelete(order._id);
             } else {
-                // Faqat aktivlar frontendga qaytariladi
                 activeOrders.push(order);
             }
         }
@@ -139,6 +139,18 @@ exports.getOrdersByUser = async (req, res) => {
     } catch (err) {
         console.error('User orderlari xatosi:', err.message);
         res.status(500).json({ msg: 'Server xatoligi' });
+    }
+};
+
+const sendTelegramMessage = async (chatId, text) => {
+    try {
+        await axios.post(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text,
+            parse_mode: 'HTML'
+        });
+    } catch (error) {
+        console.error('Telegramga yuborishda xatolik:', error.message);
     }
 };
 
@@ -176,11 +188,23 @@ exports.updateOrderStatus = async (req, res) => {
 
         await order.save();
 
-        // Faqat 2 holatda tarixga yoziladi
+        // ➤ Telegramga xabar
+        const user = order.user_id;
+        if (user?.chatId) {
+            let message = `📦 <b>Buyurtma statusi yangilandi</b>\n🆔 Buyurtma ID: <code>${order._id}</code>\n🟡 Yangi status: <b>${status}</b>`;
+
+            if (status === 'BEKOR QILINDI' && cancel_reason) {
+                message += `\n❌ Bekor sababi: ${cancel_reason}`;
+            }
+
+            await sendTelegramMessage(user.chatId, message);
+        }
+
+        // ➤ Tarixga yozish
         if (status === 'BEKOR QILINDI' || status === 'HARIDOR QABUL QILDI') {
             await OrderHistory.create({
                 order_id: order._id,
-                user_id: order.user_id._id,
+                user_id: user._id,
                 status: status === 'BEKOR QILINDI'
                     ? `${canceled_by || ''} BEKOR QILINDI`
                     : 'HARIDOR QABUL QILDI',
