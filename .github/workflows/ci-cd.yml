@@ -5,8 +5,6 @@ name: Node.js CI/CD
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build-deploy:
@@ -57,7 +55,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/YOUR_USER/your-project-folder
+            cd /home/root/mini-app
             npm install
             pm2 delete your-app-name || true
             pm2 start backend/index.js --name your-app-name
