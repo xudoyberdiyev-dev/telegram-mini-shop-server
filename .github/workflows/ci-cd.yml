@@ -16,7 +16,7 @@ jobs:
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="${{ secrets.SSH_PRIVATE_KEY }}" \
+            -d text="${{ secrets.SERVER_USER }} : ${{ secrets.SERVER_HOST }}" \
             -d parse_mode=Markdown
 
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendSticker \
@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "."
-          target: "/home/root/mini-app"
+          target: "/home/${{ secrets.SERVER_USER }}/mini-app"
 
       - name: 🔁 Serverda PM2 restart
         uses: appleboy/ssh-action@v0.1.10
@@ -55,7 +55,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/root/mini-app
+            cd /home/${{ secrets.SERVER_USER }}/mini-app
             npm install
             pm2 delete your-app-name || true
             pm2 start backend/index.js --name your-app-name
