@@ -8,7 +8,7 @@ const BASE_URL = "https://telegram-mini-shop-client.vercel.app/";
 
 const tempUsers = new Map();
 
-userBot.start(async (ctx) => {
+userBot.start(async ctx => {
     const chatId = ctx.from?.id?.toString();
     if (!chatId) return ctx.reply("❌ Chat ID topilmadi");
 
