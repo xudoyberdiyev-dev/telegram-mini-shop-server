@@ -1,10 +1,9 @@
 const multer = require('multer');
 const path = require('path');
 
-// Har bir fayl nomi noyob bo'lishi uchun vaqt qo‘shiladi
 const storage = multer.diskStorage({
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // masalan: 1719563782.png
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
