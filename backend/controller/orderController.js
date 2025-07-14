@@ -118,7 +118,6 @@ exports.getOrdersByUser = async (req, res) => {
                 order.status === 'FOYDALANUVCHI QABUL QILDI';
 
             if (isFinished) {
-                // 🔐 Tarixda mavjud emasligini tekshiramiz
                 const exists = await OrderHistory.findOne({ order_id: order._id });
                 if (!exists) {
                     await OrderHistory.create({
@@ -131,7 +130,12 @@ exports.getOrdersByUser = async (req, res) => {
 
                 await Order.findByIdAndDelete(order._id);
             } else {
-                activeOrders.push(order);
+                const cleanedProducts = order.products.filter(p => p.product_id !== null);
+                if (cleanedProducts.length > 0) {
+                    const cleanedOrder = order.toObject();
+                    cleanedOrder.products = cleanedProducts;
+                    activeOrders.push(cleanedOrder);
+                }
             }
         }
 
