@@ -2,27 +2,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const path = require('path');
 const {userBot} = require('./bot/bot');
 const createDefaultAdmin = require('./utils/createDefaultAdmin');
-
+const path = require('path');
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+// MongoDB ulash
 mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("✅ MongoDB ulandi"))
     .catch(err => console.error("❌ MongoDB xato:", err));
 
+// Test route
 app.get('/', (req, res) => {
     res.send("🚀 Bot backend ishlayapti");
 });
 
+// Botni ishga tushurish
 userBot.launch().then(() => console.log("Telegram bot ishga tushdi ✅"));
+
+// Port
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`✅ Server ${PORT}-portda ishlayapti`);
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const categoryRoutes = require('./routes/categoryRoutes');
 app.use('/api/v1/categories', categoryRoutes);
@@ -43,8 +51,3 @@ const adminRoutes = require('./routes/adminRoutes');
 app.use('/api/v1/admin', adminRoutes);
 
 createDefaultAdmin();
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`✅ Server ${PORT}-portda ishlayapti`);
-});
