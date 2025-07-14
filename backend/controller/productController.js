@@ -4,19 +4,19 @@ const cloudinary = require('../utils/cloudinary');
 exports.createProduct = async (req, res) => {
     try {
         const { name, price, description, category } = req.body;
-        const file = req.file;
+        const file = req.file?.filename || ''
 
         if (!file) return res.status(400).json({ msg: "Rasm yuboring" });
 
-        const result = await cloudinary.uploader.upload(file.path, {
-            folder: 'products'
-        });
+        // const result = await cloudinary.uploader.upload(file.path, {
+        //     folder: 'products'
+        // });
 
         const product = new Product({
             name,
             price,
             description,
-            image: result.secure_url,
+            image: file,
             category
         });
 
@@ -84,17 +84,26 @@ exports.updateProduct = async (req, res) => {
     try {
         const { name, price, description, category } = req.body;
         const file = req.file;
-        const updateData = { name, price, description, category };
 
-        if (file) {
-            const result = await cloudinary.uploader.upload(file.path, {
-                folder: 'products'
-            });
-            updateData.image = result.secure_url;
+        const product = await Product.findById(req.params.id)
+        if (!product) return res.status(404).json({ message: 'Topilmadi' })
+        let updateDate;
+        if (req.file) {
+            if (product.image) {
+                fs.unlinkSync(path.join('uploads', product.image)); // Eski rasmni o'chirish
+            }
+            category.image = req.file.filename
+            updateDate = { name, price, description, category, image: category.image };
         }
+        // if (file) {
+        //     const result = await cloudinary.uploader.upload(file.path, {
+        //         folder: 'products'
+        //     });
+        //     updateData.image = result.secure_url;
+        // }
 
-        const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        res.json(product);
+        const productUp = await Product.findByIdAndUpdate(req.params.id, updateDate, { new: true });
+        res.json({ product: productUp });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -102,6 +111,10 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     try {
+        const product = await Product.findById(req.params.id);
+        if (product.image) {
+            fs.unlinkSync(path.join('uploads', product.image)); // Eski rasmni o'chirish
+        }
         await Product.findByIdAndDelete(req.params.id);
         res.json({ msg: "Mahsulot o‘chirildi" });
     } catch (err) {

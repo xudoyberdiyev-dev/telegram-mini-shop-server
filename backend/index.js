@@ -29,7 +29,6 @@ app.listen(PORT, () => {
     console.log(`✅ Server ${PORT}-portda ishlayapti`);
 });
 
-
 const categoryRoutes = require('./routes/categoryRoutes');
 app.use('/api/v1/categories', categoryRoutes);
 
@@ -47,8 +46,5 @@ app.use('/api/v1/user', userRoutes);
 
 const adminRoutes = require('./routes/adminRoutes');
 app.use('/api/v1/admin', adminRoutes);
-
-
-
 
 createDefaultAdmin();
