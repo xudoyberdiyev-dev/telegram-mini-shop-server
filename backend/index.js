@@ -30,7 +30,7 @@ app.listen(PORT, () => {
     console.log(`✅ Server ${PORT}-portda ishlayapti`);
 });
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 const categoryRoutes = require('./routes/categoryRoutes');
 app.use('/api/v1/categories', categoryRoutes);
