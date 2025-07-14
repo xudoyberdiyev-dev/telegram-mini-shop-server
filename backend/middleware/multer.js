@@ -5,7 +5,7 @@ const fs = require('fs')
 
 const uploadPath = path.join(__dirname, '../../uploads')
 if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true })
+    fs.mkdirSync(uploadPath, {recursive: true})
 }
 
 const storage = multer.diskStorage({
@@ -18,7 +18,12 @@ const storage = multer.diskStorage({
     },
 })
 
-module.exports = multer({ storage })
+module.exports = multer({
+    storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024,
+    },
+});
 
 // const multer = require('multer');
 // const path = require('path');
