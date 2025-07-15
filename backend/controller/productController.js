@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const cloudinary = require('../utils/cloudinary');
-
+const fs = require('fs');
+const path = require('path');
 exports.createProduct = async (req, res) => {
     try {
         const { name, price, description, category } = req.body;
